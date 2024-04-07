@@ -310,6 +310,3 @@ pyrightconfig.json
 # codesandbox
 .codesandbox/
 .devcontainer/
-
-# replit
-.replit

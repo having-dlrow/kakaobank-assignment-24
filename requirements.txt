@@ -1,2 +1,2 @@
-kiwipiepy==0.17.0
-memory_profiler==0.61.0
+kiwipiepy
+memory_profiler

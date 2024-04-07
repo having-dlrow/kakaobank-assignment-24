@@ -23,7 +23,7 @@ $ docker-compose up tests --build
 #### 테스트 실행
 ```
 $ cd proejct-kiwipiepy
-$ DEBUG=on pytest
+$ DEBUG=on python -m pytest
 ```
 
 
