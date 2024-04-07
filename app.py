@@ -8,8 +8,8 @@ class RegProcessor:
 
     @staticmethod
     def find(text):
-        """실행 Wrapper""" 
-        if DEBUG:
+        """실행 Wrapper"""
+        if Debug.is_on():
             with open(DEBUG_SEARCH_FILE, 'w', encoding='utf-8') as f:
                 return RegProcessor.__findall(text, f)
         else :
@@ -18,8 +18,8 @@ class RegProcessor:
     @staticmethod
     def __findall(text, f = None):
         """전체에서 단어를 추출합니다."""
-        all_matches = re.findall(greedy_pattern, text)
-        if DEBUG:
+        all_matches = re.findall(REGEX_GREEDY_PATTERN, text)
+        if Debug.is_on():
             Debug.infoList(f, all_matches)
         
         # findall은 튜플의 리스트를 반환, 각 튜플의 첫 번째 요소만 추출
@@ -28,7 +28,7 @@ class RegProcessor:
     @staticmethod
     def search(text):
         """단어 Match 여부를 반환합니다."""
-        return re.search(non_greedy_pattern, text)    
+        return re.search(VALID_PATTERN, text)    
 
 class KiwiProcessor:
     def __init__(self):
@@ -52,53 +52,58 @@ class KiwiProcessor:
     def __concat_nnp_nng(self, tokens):
         """연속된 NNP, NNG, NNB, MM 토큰을 합칩니다."""
         temp = ''
+        count = 0
         for i, token in enumerate(tokens):
             # 현재 토큰, 이전 토큰이 TAGS_TO_CHECK 해당 하는 경우
             if (token.tag in TOKEN_TAGS_TO_CHECK and
                 (i > 0 and tokens[i-1].tag in TOKEN_TAGS_TO_CHECK)):
                 temp += token.form
+                count+=1
             else:
+                if count > 1:
+                    break
                 # 초기화
                 if temp:
                     temp = ''
                 # 재시작
                 if token.tag in TOKEN_TAGS_TO_CHECK:
                     temp = token.form
+                    count+=1
 
         return RegProcessor.search(temp)
 
-    def __extract(self, analyzed_results, tokens):
+    def __filter(self, results, analyzed_tokens):
         """단어 리스트를 분석하여 이름을 추출합니다."""
-        if self.__only_nnp(tokens):
+        if self.__only_nnp(analyzed_tokens):
             # ex. 양덕여자중학교
-            analyzed_results.append(tokens[0].form)
-        elif len(tokens) > 1:
-            if self.__startwith_nnp_and_nouns(tokens):
+            results.append(analyzed_tokens[0].form)
+        elif len(analyzed_tokens) > 1:
+            if self.__startwith_nnp_and_nouns(analyzed_tokens):
                 # ex. 경기국제통상고등학교  
-                nouns_only_sentence = ''.join(token.form for token in tokens)
-                analyzed_results.append(nouns_only_sentence)
+                nouns_only_sentence = ''.join(token.form for token in analyzed_tokens)
+                results.append(nouns_only_sentence)
 
-            elif self.__startwith_nng_and_nouns(tokens):
+            elif self.__startwith_nng_and_nouns(analyzed_tokens):
                 # ex. 여자고등학교, 국제고등학교, 국립전통예술학교
-                nouns_only_sentence = ''.join(token.form for token in tokens)
-                analyzed_results.append(nouns_only_sentence)
+                nouns_only_sentence = ''.join(token.form for token in analyzed_tokens)
+                results.append(nouns_only_sentence)
 
             else:
                 # ex. 진짜동두천여자중학교 -> 동두천여자중학교 (추출)
-                matched = self.__concat_nnp_nng(tokens)
+                matched = self.__concat_nnp_nng(analyzed_tokens)
                 if matched:
-                    analyzed_results.append(matched.group())
+                    results.append(matched.group())
 
-        return analyzed_results
+        return results
 
     def __analyze(self, words, f = None):
         """단어 리스트를 분석하여 이름을 추출합니다.""" 
         results = []
         for word in words:
             tokens = self.kiwi.tokenize(word)                           # 분석
-            if DEBUG:
+            if Debug.is_on():
                 Debug.infoDict(f, {word : tokens})
-            self.__extract(results, tokens)                             # 분류
+            self.__filter(results, tokens)                             # 분류
         return results
 
     def find(self, words):
@@ -107,7 +112,7 @@ class KiwiProcessor:
             print("No words provided to KiwiProcessor.find method")
             return []
              
-        if DEBUG:
+        if Debug.is_on():
             with open(DEBUG_ANALYZE_FILE, 'w', encoding='utf-8') as f:
                 return self.__analyze(words, f)
         else :
@@ -119,6 +124,7 @@ if __name__ == "__main__":
     Debug.start()
 
     fh = FileHandler()
+    cnt = CounterHandler()
     kiwi = KiwiProcessor()
     doc = fh.read(RESOURCE_FILE)
 
@@ -127,5 +133,9 @@ if __name__ == "__main__":
     words = kiwi.find(founds)                                           # 분석 & 분류
 
     # after
-    fh.save(CounterHandler().count(words), RESULT_DIR, RESULT_FILENAME)
+    fh.save(cnt.count(words), RESULT_DIR, RESULT_FILENAME)
+
+    # stdout
+    print(f"추출된 학교명은 총 {cnt.sum()}개 입니다.")
+
     Debug.end()

@@ -34,9 +34,9 @@ class TestFileHandler(unittest.TestCase):
 
     def test_save(self):
         """파일 저장"""
-        with patch.object(FileHandler, 'is_dir', return_value=True), \
-             patch.object(FileHandler, 'add_datetime', return_value=self.TEST_FILENAME), \
-             patch.object(FileHandler, 'write') as mocked_write:
+        with patch.object(self.handler, '_FileHandler__is_dir', return_value=True), \
+             patch.object(self.handler, '_FileHandler__add_datetime', return_value=self.TEST_FILENAME), \
+             patch.object(self.handler, 'write') as mocked_write:
             # when
             filename = self.handler.save(self.TEST_DATA, self.TEST_DIR, self.TEST_FILENAME)
             # then
@@ -46,7 +46,7 @@ class TestFileHandler(unittest.TestCase):
     def test_add_datetime(self):
         """@private test"""
         # when
-        result = self.handler.add_datetime(self.TEST_FILENAME)
+        result = self.handler._FileHandler__add_datetime(self.TEST_FILENAME)
 
         # then
         self.assertTrue(result.startswith(self.TEST_FILENAME))
@@ -57,7 +57,7 @@ class TestFileHandler(unittest.TestCase):
              patch('os.makedirs') as mocked_makedirs:
             """@private test"""
             # when
-            result = self.handler.is_dir(self.TEST_DIR)
+            result = self.handler._FileHandler__is_dir(self.TEST_DIR)
             # then
             self.assertTrue(result)
             mocked_makedirs.assert_called_once_with(self.TEST_DIR)

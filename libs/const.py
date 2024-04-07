@@ -19,8 +19,8 @@ greedy_words = ['대학교', '고', '중', '초']
 non_greedy_include = '|'.join(non_greedy_words)
 greedy_include = '|'.join(greedy_words)
 
-greedy_pattern = rf"([가-힣]+?({non_greedy_include})|[가-힣]+({greedy_include}))"
-non_greedy_pattern = rf"([가-힣]+({non_greedy_include})|[가-힣]+({greedy_include}))"
+REGEX_GREEDY_PATTERN = rf"([가-힣]+?({non_greedy_include})|[가-힣]+({greedy_include}))"    # Regex 검색 패턴
+VALID_PATTERN = rf"([가-힣]+({non_greedy_include})|[가-힣]+({greedy_include}))" # Kiwipiepy 분석 단어, 검증용
 
 # 포함 형태소
 NNP='NNP'
