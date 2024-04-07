@@ -1,3 +1,2 @@
 kiwipiepy==0.17.0
 memory_profiler==0.61.0
-pytest==8.1.1

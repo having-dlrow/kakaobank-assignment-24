@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DEBUG=off
+    volumes:
+      - .:/app/result
+    command: python app.py
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.pytest
+    environment:
+      - DEBUG=on
+    command: pytest
