@@ -16,7 +16,7 @@ class TestRegProcessor(unittest.TestCase):
             mock_findall.return_value = [('School', 'dummy')]
             text = "School test School"
             
-            result = self.processor.findall(text)
+            result = self.processor.find(text)
             mock_findall.assert_called_once_with(greedy_pattern, text)
             self.assertEqual(result, ['School'])
 
@@ -40,7 +40,7 @@ class TestKiwiProcessor(unittest.TestCase):
             mock_kiwi_instance.tokenize.return_value = [mock_token]
 
             processor = KiwiProcessor()  # Kiwi 인스턴스는 내부적으로 목킹됨
-            result = processor.analyze(['School'])
+            result = processor.__analyze(['School'])
             
             mock_kiwi_instance.tokenize.assert_called_once_with('School')
             self.assertIn('School', result[0])

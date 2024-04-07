@@ -7,7 +7,6 @@ WORKDIR /app
 # 현재 디렉토리의 파일들을 컨테이너의 작업 디렉토리로 복사
 COPY . /app
 
-MOUNT . /app/result
 # requirements.txt에 명시된 패키지들 설치
 RUN pip install --no-cache-dir -r requirements.txt
 

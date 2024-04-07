@@ -2,13 +2,13 @@
 # 파일 및 환경 설정
 RES_DIR = 'resource'
 RESULT_DIR = 'result'
-RESULT_FILENAME = 'result'
+RESULT_FILENAME = f"{RESULT_DIR}/result"
 
 RESOURCE_FILE = f"{RES_DIR}/comments.csv"
 USER_DICT_FILE = f"{RES_DIR}/userDict.txt"
 
-DEBUG_SEARCH_FILE = f"{RESULT_DIR}/search_app.txt"
-DEBUG_ANALYZE_FILE = f"{RESULT_DIR}/analyze_app.txt"
+DEBUG_SEARCH_FILE = f"{RESULT_DIR}/log_search.log"
+DEBUG_ANALYZE_FILE = f"{RESULT_DIR}/log_analyze.log"
 
 
 # 검색할 단어 설정

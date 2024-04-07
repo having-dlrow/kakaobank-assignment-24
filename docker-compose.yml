@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    environment:
+      - DEBUG=on
+    volumes:
+      - .:/app/result
+    command: python app.py

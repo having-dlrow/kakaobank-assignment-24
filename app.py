@@ -1,22 +1,31 @@
 import re
 import kiwipiepy
 from libs.debug import *
-from libs.handler import *
+from libs.handler import FileHandler, CounterHandler
 from libs.const import *
 
 class RegProcessor:
-    def __init__(self):
-        pass
 
-    def findall(self, text):
+    @staticmethod
+    def find(text):
+        """실행 Wrapper""" 
+        if DEBUG:
+            with open(DEBUG_SEARCH_FILE, 'w', encoding='utf-8') as f:
+                return RegProcessor.__findall(text, f)
+        else :
+            return RegProcessor.__findall(text)
+
+    @staticmethod
+    def __findall(text, f = None):
         """전체에서 단어를 추출합니다."""
         all_matches = re.findall(greedy_pattern, text)
-
-        Debug.reg(all_matches)
+        if DEBUG:
+            Debug.infoList(f, all_matches)
         
         # findall은 튜플의 리스트를 반환, 각 튜플의 첫 번째 요소만 추출
         return [key[0] for key in all_matches]
     
+    @staticmethod
     def search(text):
         """단어 Match 여부를 반환합니다."""
         return re.search(non_greedy_pattern, text)    
@@ -82,33 +91,41 @@ class KiwiProcessor:
 
         return analyzed_results
 
-    def analyze(self, words):
+    def __analyze(self, words, f = None):
         """단어 리스트를 분석하여 이름을 추출합니다.""" 
         results = []
+        for word in words:
+            tokens = self.kiwi.tokenize(word)                           # 분석
+            if DEBUG:
+                Debug.infoDict(f, {word : tokens})
+            self.__extract(results, tokens)                             # 분류
+        return results
+
+    def find(self, words):
+        """실행 Wrapper"""
+        if words is None:
+            print("No words provided to KiwiProcessor.find method")
+            return []
+             
         if DEBUG:
             with open(DEBUG_ANALYZE_FILE, 'w', encoding='utf-8') as f:
-                for word in words:
-                    tokens = self.kiwi.tokenize(word)           # 분석
-                    Debug.token(f, word, tokens)
-                    self.__extract(results, tokens)             # 분류
+                return self.__analyze(words, f)
         else :
-            for word in words:
-                tokens = self.kiwi.tokenize(word)               # 분석
-                self.__extract(results, tokens)                 # 분류
-
-        return results
+            return self.__analyze(words)
 
 if __name__ == "__main__":
     
     # pre
     Debug.start()
+
     fh = FileHandler()
+    kiwi = KiwiProcessor()
     doc = fh.read(RESOURCE_FILE)
 
     # process
-    founds = RegProcessor().findall(doc)                    # 추출
-    words = KiwiProcessor().analyze(founds)                 # 분석 & 분류
+    founds = RegProcessor.find(doc)                                     # 추출
+    words = kiwi.find(founds)                                           # 분석 & 분류
 
     # after
-    fh.save(CounterProcessor().count(words))
+    fh.save(CounterHandler().count(words), RESULT_DIR, RESULT_FILENAME)
     Debug.end()
